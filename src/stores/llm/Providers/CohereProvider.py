@@ -1,5 +1,5 @@
 from ..LLMInterface import LLMInterface
-from .LLMEnums import CohereEnums , DocumentTypeEnums
+from ..LLMEnum import CoHereEnums , DocumentTypeEnums
 import cohere
 import logging
 
@@ -33,7 +33,7 @@ class CoHereProvider(LLMInterface):
         self.embedding_size = embedding_size
 
     def process_text(self , text : str):
-        return text[:self.default_input_max_characters].trim()
+        return text[:self.default_input_max_characters].strip()
 
     def generate_text(self , prompt : str, 
                     chat_history : list =[],max_output_tokens: int = None , temperature : float = None):
@@ -50,7 +50,7 @@ class CoHereProvider(LLMInterface):
 
         response = self.client.chat(model = self.generation_model_id ,
                                     chat_history = chat_history ,
-                                    message = self.construct_prompt(self.process_text(prompt),role = CohereEnums.USER.value),
+                                    message = self.construct_prompt(self.process_text(prompt),role = CoHereEnums.USER.value),
                                     temperature = temperature,
                                     max_tokens = max_output_tokens)
         
@@ -64,13 +64,13 @@ class CoHereProvider(LLMInterface):
             self.logger.error("CoHere client wasn't set.")
             return None
 
-        if not self.generation_model_id:
+        if not self.embedding_model_id:
             self.logger.error("Embedding model for CoHere wasn't set")
             return None
 
-        input_type = CohereEnums.DOCUMENT.value
+        input_type = CoHereEnums.DOCUMENT.value
         if document_type == DocumentTypeEnums.QUERY.value:
-            input_type = CohereEnums.QUERY.value
+            input_type = CoHereEnums.QUERY.value
         
         response = self.client.embed(
             model=self.embedding_model_id,
