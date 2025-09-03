@@ -21,7 +21,7 @@ class OpenAIProvider(LLMInterface):
         self.embedding_model_id = None
         self.embedding_size = None
 
-        self.client = OpenAI(api_key = self.api_key , api_url = self.api_url)
+        self.client = OpenAI(api_key = self.api_key , base_url = self.api_url)
         self.enums = OpenAIEnums
 
         self.logger = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ class OpenAIProvider(LLMInterface):
         self.embedding_size = embedding_size
 
     def process_text(self , text : str):
-        return text[:self.default_input_max_characters].trim()
+        return text[:self.default_input_max_characters].strip()
     
     def construct_prompt(self , prompt : str , role : str):
         return {
@@ -59,7 +59,7 @@ class OpenAIProvider(LLMInterface):
 
         response = self.client.chat.completions.create(
             model = self.generation_model_id,
-            message= chat_history,
+            messages= chat_history,
             max_tokens = max_output_token,
             temperature = temperature
         )

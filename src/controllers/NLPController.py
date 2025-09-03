@@ -1,5 +1,5 @@
 from .BaseController import BaseController
-from models.db_schemas import Project , DataChunck
+from models.db_schemas import Project , DataChunk
 from stores.llm.LLMEnum import DocumentTypeEnums
 from typing import List
 import json
@@ -30,14 +30,14 @@ class NLPController(BaseController):
         return json.loads(json.dumps(collection_info,default=lambda x : x.__dict__))
     
     def index_into_vector_db(self , project : Project ,
-                             chuncks : List[DataChunck] ,
-                             chuncks_ids : List[int],
+                             chunks : List[DataChunk] ,
+                             chunks_ids : List[int],
                              do_reset : bool = False):
 
         collection_name = self.create_collection_name(project_id= project.project_id)
 
-        texts = [chunck.chunck_text for chunck in chuncks]
-        metadatas = [chunck.chunck_metadata for chunck in chuncks]
+        texts = [chunk.chunk_text for chunk in chunks]
+        metadatas = [chunk.chunk_metadata for chunk in chunks]
 
         vectors = [
             self.embedding_client.embed_text(text = text, document_type=DocumentTypeEnums.DOCUMENT.value)
@@ -48,7 +48,7 @@ class NLPController(BaseController):
         _ = self.vectordb_client.create_collection(collection_name = collection_name , embedding_size = self.embedding_client.embedding_size, do_reset = do_reset)
 
 
-        self.vectordb_client.insert_many(collection_name = collection_name , texts = texts , metadata = metadatas , vectors = vectors , record_ids = chuncks_ids)
+        self.vectordb_client.insert_many(collection_name = collection_name , texts = texts , metadata = metadatas , vectors = vectors , record_ids = chunks_ids)
 
         return True
 
@@ -87,12 +87,15 @@ class NLPController(BaseController):
         document_prompts = "\n".join([
             self.template_parser.get("rag" , "document_prompt",{
                 "doc_num" : idx+1,
-                "chunk_text" : doc.text
+                "chunk_text" : self.generation_client.process_text(doc.text)
             })
             for idx , doc in enumerate(retrieved_documents)
         ])
 
-        footer_prompt = self.template_parser.get("rag" , "footer_prompt")
+        footer_prompt = self.template_parser.get("rag" , "footer_prompt",{
+            "query" : query,
+            
+        })
 
         chat_history = [
             self.generation_client.construct_prompt(
