@@ -1,3 +1,4 @@
+# Setting all needed enums for LLMs providers
 from enum import Enum
 
 class LLMEnums(Enum):

@@ -1,3 +1,4 @@
+# Setting all needed enums for vector db providers
 from enum import Enum
 
 class VectorDBEnums(Enum):

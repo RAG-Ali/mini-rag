@@ -1,3 +1,5 @@
+# Setting prompts that will be given to the template parser
+
 from string import Template
 
 #### RAG PROMPTS ####
